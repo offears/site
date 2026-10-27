@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Макет операции Stars — как на фото</title>
+<style>
+:root{
+  color-scheme: dark;
+  --bg: #0e1116;
+  --panel: #15191f;
+  --panel2: #1f242d;
+  --text: #ffffff;
+  --muted: #8e96a3;
+  --blue: #1c7ed6; /* Тусклый синий цвет */
+  --red: #ff453a;
+  --green: #32d74b;
+  --line: #232830;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;}
+header{padding:20px 24px;border-bottom:1px solid var(--line);background:#12161c;}
+header h1{font-size:20px;margin:0 0 4px;font-weight:600;}
+header p{margin:0;color:var(--muted);font-size:13px;}
+main{max-width:1200px;margin:0 auto;padding:24px;display:grid;grid-template-columns:minmax(300px,400px) minmax(340px,1fr);gap:24px;align-items:start;}
+
+/* --- ПАНЕЛЬ РЕДАКТОРА --- */
+.editor{background:#12161c;border:1px solid var(--line);border-radius:16px;padding:20px;}
+h2{font-size:16px;margin:0 0 16px;font-weight:600;}
+.field{display:flex;flex-direction:column;gap:6px;margin:0 0 14px;}
+label{font-size:13px;color:#c5ccd6;}
+input,select{width:100%;background:#0b0e13;border:1px solid #2e3645;border-radius:10px;color:var(--text);padding:10px 12px;font:inherit;min-height:42px;}
+input:focus,select:focus{outline:2px solid var(--blue);border-color:var(--blue);}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.hint{font-size:12px;color:var(--muted);margin:-4px 0 14px;}
+button{border:0;border-radius:10px;padding:12px 16px;font:600 14px system-ui;cursor:pointer;transition:opacity .2s;}
+button:hover{opacity:0.9;}
+.primary{background:var(--blue);color:white;width:100%;margin-bottom:10px;}
+.secondary{background:var(--panel2);color:#fff;width:100%;margin-bottom:10px;}
+.paste-btn{width:100%;margin-top:8px;background:var(--panel2);color:#fff;border:1px solid #333c4a;padding:10px;}
+.paste-note{font-size:12px;color:var(--muted);margin:-4px 0 16px;line-height:1.3;}
+
+/* --- ПРЕДПРОСМОТР --- */
+.preview-wrap{padding:0;border-radius:16px;overflow:hidden;background:#0e1116;border:1px solid var(--line);}
+.preview-top{padding:14px 18px;background:#12161c;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
+.preview-top strong{font-size:14px;font-weight:600;}
+.demo-pill{font-size:10px;font-weight:700;letter-spacing:.5px;color:#ffd15c;border:1px solid #705a23;border-radius:20px;padding:4px 8px;}
+
+/* =========================================
+   ТОЧНАЯ КОПИЯ ИНТЕРФЕЙСА (iOS Telegram)
+   ========================================= */
+.tg-card{
+  width: 100%;
+  max-width: 390px;
+  margin: 0 auto;
+  background: #0e0e0e;
+  min-height: 700px;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  padding: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Звезда из локального файла */
+.tg-star {
+  display: inline-block;
+  flex-shrink: 0;
+  background-image: url('star.png'); /* УКАЖИ ЗДЕСЬ ИМЯ СВОЕГО ФАЙЛА */
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* Верхний блок (Баланс) */
+.top-balance {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 16px;
+}
+.balance-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.star-icon {
+  width: 42px;
+  height: 42px;
+  margin-top: -4px;
+}
+.amount-val {
+  font-size: 40px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  color: #ffffff;
+  line-height: 1.1;
+}
+.balance-sub {
+  color: #8e8e93;
+  font-size: 15px;
+  font-weight: 500;
+  margin-bottom: 22px;
+}
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 16px;
+}
+.btn-blue {
+  flex: 1;
+  background: var(--blue);
+  color: white;
+  border-radius: 10px;
+  padding: 12px 0;
+  font-weight: 600;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 0;
+  cursor: pointer;
+}
+.link-btn {
+  color: var(--blue);
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* Блок Заработать */
+.earn-card {
+  background: #1c1c1e;
+  border-radius: 14px;
+  margin: 0 16px;
+  padding: 14px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  cursor: pointer;
+}
+.earn-icon {
+  width: 44px;
+  height: 44px;
+  background: #2ea84e;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+.earn-content { flex: 1; }
+.earn-title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 3px;
+}
+.earn-title {
+  font-weight: 700;
+  font-size: 16px;
+  color: #ffffff;
+}
+.badge-new {
+  background: var(--blue);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 5px;
+  border-radius: 5px;
+}
+.earn-desc {
+  color: #8e8e93;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.35;
+}
+.earn-arrow { color: #5a6371; font-size: 22px; font-weight: 300; }
+
+/* Вкладки */
+.tabs-container {
+  display: flex;
+  gap: 24px;
+  padding: 14px 16px 0 16px;
+  border-bottom: 1px solid #2c2c2e;
+  margin-top: 4px;
+}
+.tab {
+  padding: 10px 0 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #8e8e93;
+  cursor: pointer;
+  position: relative;
+}
+.tab.active { color: var(--blue); }
+.tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--blue);
+  border-radius: 3px 3px 0 0;
+}
+
+/* Транзакции */
+.txn-list { display: flex; flex-direction: column; }
+.txn {
+  display: grid;
+  grid-template-columns: 54px 1fr auto;
+  gap: 12px;
+  padding: 12px 16px;
+}
+.txn:not(:last-child) .txn-main {
+  border-bottom: 1px solid #2c2c2e;
+  padding-bottom: 12px;
+}
+.avatar {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #2a303b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  overflow: hidden;
+}
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+.txn-main { display: flex; flex-direction: column; justify-content: center; }
+.txn-name { font-weight: 600; font-size: 17px; color: #ffffff; margin-bottom: 1px; }
+.txn-desc { font-size: 15px; color: #ffffff; margin-bottom: 2px; }
+.txn-date { font-size: 14px; color: #8e8e93; }
+.txn-amount {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 17px;
+  font-weight: 600;
+  align-self: center;
+  white-space: nowrap;
+}
+.txn-amount .val-minus { color: var(--red); }
+.txn-amount .val-plus { color: var(--green); }
+.txn-amount .star { width: 18px; height: 18px; }
+
+@media(max-width:850px){
+  main{grid-template-columns:1fr;padding:14px;}
+  .tg-card{border-radius: 0;}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Редактор макета Telegram Stars</h1>
+  <p>Оригинальная звезда из файла, тусклый синий и жирный шрифт</p>
+</header>
+<main>
+<section class="editor">
+  <h2>Настройки записи</h2>
+  
+  <div class="field">
+    <label for="username">Имя пользователя</label>
+    <input id="username" value="Floopy" maxlength="64">
+  </div>
+  
+  <div class="two">
+    <div class="field">
+      <label for="balanceValue">Баланс звёзд</label>
+      <input id="balanceValue" type="text" value="9.3">
+    </div>
+    <div class="field">
+      <label for="amount">Сумма (звёзды)</label>
+      <input id="amount" type="text" value="2.45">
+    </div>
+  </div>
+
+  <div class="two">
+    <div class="field">
+      <label for="direction">Операция</label>
+      <select id="direction">
+        <option value="minus">Списание −</option>
+        <option value="plus">Зачисление +</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="type">Описание</label>
+      <select id="type">
+        <option value="Оплата 1 сообщения">Оплата 1 сообщения</option>
+        <option value="Подарок">Подарок</option>
+        <option value="Покупка подарка">Покупка подарка</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="two">
+    <div class="field">
+      <label for="date">Дата</label>
+      <input id="date" type="text" value="27 окт., 18:52">
+    </div>
+    <div class="field">
+      <label for="note">Приписка (опц.)</label>
+      <input id="note" type="text" value="— Возврат">
+    </div>
+  </div>
+
+  <!-- Аватарка -->
+  <div class="field">
+    <label for="avatarFile">Аватарка</label>
+    <input id="avatarFile" type="file" accept="image/*">
+    <button class="paste-btn" id="pasteAvatar" type="button">📋 Вставить из буфера</button>
+  </div>
+
+  <button class="primary" id="downloadPng" type="button">⬇ Скачать PNG</button>
+  <button class="secondary" id="reset" type="button">Сбросить</button>
+</section>
+
+<section class="preview-wrap">
+  <div class="preview-top">
+    <strong>Предпросмотр записи</strong>
+    <span class="demo-pill">ПРЕДПРОСМОТР</span>
+  </div>
+  
+  <div class="tg-card" id="exportArea">
+    
+    <!-- Баланс -->
+    <div class="top-balance">
+      <div class="balance-row">
+        <div class="tg-star star-icon"></div>
+        <div class="amount-val" id="balancePreview">9.3</div>
+      </div>
+      <div class="balance-sub">Ваш баланс</div>
+      
+      <div class="action-buttons">
+        <button class="btn-blue" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+          Пополнить
+        </button>
+        <button class="btn-blue" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          Статистика
+        </button>
+      </div>
+      
+      <button class="link-btn" type="button">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        Подарить звёзды друзьям
+      </button>
+    </div>
+
+    <!-- Заработать звёзды -->
+    <div class="earn-card">
+      <div class="earn-icon">🤖</div>
+      <div class="earn-content">
+        <div class="earn-title-row">
+          <span class="earn-title">Заработать звёзды</span>
+          <span class="badge-new">NEW</span>
+        </div>
+        <div class="earn-desc">Вы можете делиться ссылками на мини-приложения и получать часть их дохода в звёздах.</div>
+      </div>
+      <div class="earn-arrow">›</div>
+    </div>
+
+    <!-- Вкладки -->
+    <div class="tabs-container">
+      <div class="tab active">Все операции</div>
+      <div class="tab">Зачисления</div>
+      <div class="tab">Списания</div>
+    </div>
+    
+    <!-- Транзакции -->
+    <div class="txn-list">
+      
+      <!-- Транзакция 1 (настраиваемая) -->
+      <div class="txn">
+        <div class="avatar" id="avatarPreview1">👤</div>
+        <div class="txn-main">
+          <div class="txn-name" id="namePreview1">Floopy</div>
+          <div class="txn-desc" id="typePreview1">Оплата 1 сообщения</div>
+          <div class="txn-date"><span id="datePreview1">27 окт., 18:52</span> <span id="notePreview1">— Возврат</span></div>
+        </div>
+        <div class="txn-amount">
+          <span id="amountPreview1" class="val-minus">-2.45</span>
+          <div class="tg-star star"></div>
+        </div>
+      </div>
+
+      <!-- Транзакция 2 (статичная) -->
+      <div class="txn">
+        <div class="avatar" id="avatarPreview2">👤</div>
+        <div class="txn-main">
+          <div class="txn-name" id="namePreview2">Floopy</div>
+          <div class="txn-desc">Оплата 1 сообщения</div>
+          <div class="txn-date">27 окт., 18:51</div>
+        </div>
+        <div class="txn-amount">
+          <span class="val-plus">+2.55</span>
+          <div class="tg-star star"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+let avatarUrl = '';
+
+function render() {
+  const name = $('username').value.trim() || 'Floopy';
+  const balance = $('balanceValue').value.trim() || '0';
+  const amount = $('amount').value.trim() || '0';
+  const dir = $('direction').value;
+  const type = $('type').value;
+  const date = $('date').value.trim() || '01.01';
+  const note = $('note').value.trim();
+
+  $('namePreview1').textContent = name;
+  $('namePreview2').textContent = name;
+  $('balancePreview').textContent = balance;
+  $('typePreview1').textContent = type;
+  
+  $('datePreview1').textContent = date;
+  $('notePreview1').textContent = note ? ` ${note}` : '';
+  
+  const amtEl = $('amountPreview1');
+  amtEl.textContent = (dir === 'minus' ? '-' : '+') + amount.replace(/^[+-]/, '');
+  amtEl.className = dir === 'minus' ? 'val-minus' : 'val-plus';
+
+  const av1 = $('avatarPreview1');
+  const av2 = $('avatarPreview2');
+  av1.innerHTML = ''; 
+  av2.innerHTML = '';
+  
+  if (avatarUrl) {
+    const img1 = document.createElement('img'); img1.src = avatarUrl;
+    const img2 = document.createElement('img'); img2.src = avatarUrl;
+    av1.appendChild(img1);
+    av2.appendChild(img2);
+  } else {
+    av1.textContent = '👤';
+    av2.textContent = '👤';
+  }
+}
+
+['username','balanceValue','amount','direction','type','date','note'].forEach(id => {
+  $(id).addEventListener('input', render);
+  $(id).addEventListener('change', render);
+});
+
+function useImageFile(file) {
+  if (!file) return;
+  if (!file.type || !file.type.startsWith('image/')) {
+    alert('Пожалуйста, выберите изображение.');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = e => {
+    avatarUrl = e.target.result;
+    render();
+  };
+  reader.readAsDataURL(file);
+}
+
+$('avatarFile').addEventListener('change', e => {
+  const file = e.target.files && e.target.files[0];
+  if (file) useImageFile(file);
+});
+
+$('pasteAvatar').addEventListener('click', async () => {
+  if (!navigator.clipboard || !navigator.clipboard.read) {
+    alert('Нажми Ctrl+V на странице после копирования картинки.');
+    return;
+  }
+  try {
+    const items = await navigator.clipboard.read();
+    for (const item of items) {
+      const type = item.types.find(t => t.startsWith('image/'));
+      if (type) {
+        const blob = await item.getType(type);
+        useImageFile(new File([blob], 'clipboard-image.png', { type }));
+        return;
+      }
+    }
+    alert('В буфере обмена нет изображения.');
+  } catch (err) {
+    alert('Браузер не дал прочитать буфер. Нажми Ctrl+V на странице.');
+  }
+});
+
+document.addEventListener('paste', e => {
+  const items = Array.from(e.clipboardData?.items || []);
+  const item = items.find(x => x.type.startsWith('image/'));
+  if (item) {
+    const file = item.getAsFile();
+    if (file) {
+      e.preventDefault();
+      useImageFile(file);
+    }
+  }
+});
+
+$('downloadPng').addEventListener('click', async () => {
+  const btn = $('downloadPng');
+  btn.disabled = true;
+  btn.textContent = 'Подготовка PNG…';
+  try {
+    if (!window.html2canvas) throw new Error('Нет html2canvas');
+    const canvas = await window.html2canvas($('exportArea'), {
+      backgroundColor: '#0e0e0e', 
+      scale: 2, 
+      useCORS: true
+    });
+    const link = document.createElement('a');
+    link.download = 'stars-mockup.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  } catch (err) {
+    alert('Не удалось создать PNG.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '⬇ Скачать PNG';
+  }
+});
+
+$('reset').addEventListener('click', () => {
+  $('username').value = 'Floopy';
+  $('balanceValue').value = '9.3';
+  $('amount').value = '2.45';
+  $('direction').value = 'minus';
+  $('type').value = 'Оплата 1 сообщения';
+  $('date').value = '27 окт., 18:52';
+  $('note').value = '— Возврат';
+  $('avatarFile').value = '';
+  avatarUrl = '';
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
